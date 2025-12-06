@@ -455,6 +455,7 @@ module.exports = async (req, res) => {
     const now = Date.now();
     if (!rateLimitCache[clientIP]) {
       rateLimitCache[clientIP] = [];
+      console.log('API: Creating new cache entry for IP:', clientIP);
     }
     
     // 過濾出在時間窗口內的請求
@@ -464,12 +465,22 @@ module.exports = async (req, res) => {
     
     const currentCount = rateLimitCache[clientIP].length;
     
+    console.log('API: Final rate limit check:', {
+      clientIP,
+      currentCount,
+      limit: RATE_LIMIT,
+      cacheSize: Object.keys(rateLimitCache).length,
+      timestamps: rateLimitCache[clientIP]
+    });
+    
     const rateLimitInfo = {
       remaining: Math.max(0, RATE_LIMIT - currentCount),
       count: currentCount,
       limit: RATE_LIMIT,
       windowSeconds: Math.floor(RATE_WINDOW / 1000)
     };
+    
+    console.log('API: Returning rateLimitInfo:', rateLimitInfo);
     
     res.json({ 
       success: true, 

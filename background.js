@@ -213,9 +213,21 @@ async function generateSummary(videoData, progressCallback) {
       throw new Error(data.error || '生成重點時發生錯誤');
     }
 
+    // 確保 rateLimitInfo 存在，如果沒有則創建默認值
+    let rateLimitInfo = data.rateLimitInfo;
+    if (!rateLimitInfo) {
+      console.warn('Background: No rateLimitInfo in response, creating default');
+      rateLimitInfo = {
+        remaining: 2, // 假設還有剩餘次數
+        count: 1,
+        limit: 3,
+        windowSeconds: 60
+      };
+    }
+
     const result = {
       summary: data.summary,
-      rateLimitInfo: data.rateLimitInfo || null
+      rateLimitInfo: rateLimitInfo
     };
     
     console.log('Background: Returning result:', result); // 調試用
