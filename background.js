@@ -132,10 +132,23 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     generateSummary(request.data, progressCallback)
       .then(result => {
         console.log('Background: Sending response with rateLimitInfo:', result.rateLimitInfo); // 調試用
+        console.log('Background: Full result object:', JSON.stringify(result, null, 2));
+        
+        // 確保 rateLimitInfo 存在
+        if (!result.rateLimitInfo || result.rateLimitInfo.remaining === undefined) {
+          console.warn('Background: Missing rateLimitInfo in result, creating default');
+          result.rateLimitInfo = {
+            remaining: 2,
+            count: 1,
+            limit: 3,
+            windowSeconds: 60
+          };
+        }
+        
         sendResponse({ 
           success: true, 
           summary: result.summary,
-          rateLimitInfo: result.rateLimitInfo || null
+          rateLimitInfo: result.rateLimitInfo
         });
       })
       .catch(error => {
@@ -215,8 +228,9 @@ async function generateSummary(videoData, progressCallback) {
 
     // 確保 rateLimitInfo 存在，如果沒有則創建默認值
     let rateLimitInfo = data.rateLimitInfo;
-    if (!rateLimitInfo) {
-      console.warn('Background: No rateLimitInfo in response, creating default');
+    if (!rateLimitInfo || rateLimitInfo.remaining === undefined) {
+      console.warn('Background: No valid rateLimitInfo in response, creating default');
+      console.warn('Background: Received data:', JSON.stringify(data, null, 2));
       rateLimitInfo = {
         remaining: 2, // 假設還有剩餘次數
         count: 1,
@@ -230,7 +244,7 @@ async function generateSummary(videoData, progressCallback) {
       rateLimitInfo: rateLimitInfo
     };
     
-    console.log('Background: Returning result:', result); // 調試用
+    console.log('Background: Returning result:', JSON.stringify(result, null, 2)); // 調試用
     
     return result;
   } catch (error) {

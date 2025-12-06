@@ -142,14 +142,24 @@ document.addEventListener('DOMContentLoaded', async () => {
             summaryContent.textContent = summaryResponse.summary;
             
             // 更新時間限制資訊（header 和首頁）
-            console.log('Popup: Received summaryResponse:', summaryResponse);
+            console.log('Popup: Received summaryResponse:', JSON.stringify(summaryResponse, null, 2));
             console.log('Popup: rateLimitInfo in response:', summaryResponse.rateLimitInfo);
+            console.log('Popup: rateLimitInfo type:', typeof summaryResponse.rateLimitInfo);
+            console.log('Popup: rateLimitInfo remaining:', summaryResponse.rateLimitInfo?.remaining);
             
-            if (summaryResponse.rateLimitInfo && summaryResponse.rateLimitInfo.remaining !== undefined) {
+            if (summaryResponse.rateLimitInfo && typeof summaryResponse.rateLimitInfo === 'object' && summaryResponse.rateLimitInfo.remaining !== undefined) {
               console.log('Popup: Calling updateRateLimitInfo with:', summaryResponse.rateLimitInfo);
               updateRateLimitInfo(summaryResponse.rateLimitInfo);
             } else {
               console.warn('Popup: No valid rateLimitInfo in response');
+              console.warn('Popup: summaryResponse keys:', Object.keys(summaryResponse || {}));
+              // 即使沒有 rateLimitInfo，也嘗試使用默認值
+              updateRateLimitInfo({
+                remaining: 2,
+                count: 1,
+                limit: 3,
+                windowSeconds: 60
+              });
             }
             
             loading.classList.add('hidden');
