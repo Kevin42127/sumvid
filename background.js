@@ -1,4 +1,4 @@
-const BACKEND_API_URL = 'https://your-project.vercel.app/api';
+const BACKEND_API_URL = 'https://sumvid.vercel.app/api';
 
 function detectLanguage(text) {
   if (!text || text.length === 0) return 'zh';
