@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SumVid - 影片重點生成</title>
+  <link rel="stylesheet" href="popup.css">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>SumVid</h1>
+    </div>
+    
+    <div class="content">
+      <div id="status" class="status hidden"></div>
+      
+      <div id="videoInfo" class="video-info hidden">
+        <div class="info-item">
+          <span class="material-icons">videocam</span>
+          <span id="videoTitle" class="video-title"></span>
+        </div>
+      </div>
+      
+      <div id="loading" class="loading hidden">
+        <div class="spinner"></div>
+        <p id="loadingText">正在分析影片內容...</p>
+        <div class="progress-container">
+          <div class="progress-bar">
+            <div id="progressFill" class="progress-fill"></div>
+          </div>
+          <span id="progressText" class="progress-text">0%</span>
+        </div>
+      </div>
+      
+      <div id="successAnimation" class="success-animation hidden">
+        <div class="success-icon">
+          <span class="material-icons">check_circle</span>
+        </div>
+        <p>重點生成完成！</p>
+      </div>
+      
+      <div id="summary" class="summary hidden">
+        <div class="summary-header">
+          <span class="material-icons">article</span>
+          <h2>影片重點</h2>
+          <button id="copyBtn" class="copy-btn" title="複製重點">
+            <span class="material-icons">content_copy</span>
+          </button>
+        </div>
+        <div id="summaryContent" class="summary-content"></div>
+      </div>
+      
+      <div id="error" class="error hidden">
+        <span class="material-icons">error</span>
+        <p id="errorMessage"></p>
+      </div>
+      
+      <button id="generateBtn" class="generate-btn">
+        <span class="material-icons">auto_awesome</span>
+        <span>生成影片重點</span>
+      </button>
+    </div>
+  </div>
+  
+  <script src="popup.js"></script>
+</body>
+</html>
+
