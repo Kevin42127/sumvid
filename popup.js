@@ -13,10 +13,54 @@ document.addEventListener('DOMContentLoaded', async () => {
       const videoTitle = document.getElementById('videoTitle');
       const status = document.getElementById('status');
       const copyBtn = document.getElementById('copyBtn');
+      const backBtn = document.getElementById('backBtn');
+      const welcomeLimitInfo = document.getElementById('welcomeLimitInfo');
+      const welcomeSection = document.getElementById('welcomeSection');
+      
+  // 載入時檢查是否有存儲的限額資訊（時間限制不需要日期檢查）
+  chrome.storage.local.get(['rateLimitInfo'], (result) => {
+    if (result.rateLimitInfo) {
+      updateRateLimitInfo(result.rateLimitInfo, false);
+    }
+  });
+  
+  // 更新時間限制資訊的函數
+  function updateRateLimitInfo(rateLimitInfo, saveToStorage = true) {
+    if (!rateLimitInfo || rateLimitInfo.remaining === undefined) {
+      console.log('updateRateLimitInfo: Invalid rateLimitInfo', rateLimitInfo);
+      return;
+    }
+    
+    const { remaining, count, limit, windowSeconds } = rateLimitInfo;
+    console.log('updateRateLimitInfo: Updating with', { remaining, count, limit, windowSeconds });
+    
+    // 更新 header 中的限額資訊
+    const headerLimitInfoEl = document.getElementById('headerLimitInfo');
+    const headerLimitInfoText = document.getElementById('headerLimitInfoText');
+    if (headerLimitInfoEl && headerLimitInfoText) {
+      headerLimitInfoText.textContent = `剩餘 ${remaining}/${limit} 次（${windowSeconds}秒內）`;
+      headerLimitInfoEl.classList.remove('hidden');
+      console.log('✅ Header rate limit info updated');
+    } else {
+      console.error('❌ Header limit info elements not found');
+    }
+    
+    // 更新首頁中的限額資訊
+    if (welcomeLimitInfo) {
+      welcomeLimitInfo.textContent = `每分鐘最多 ${limit} 次生成`;
+    }
+    
+    // 存儲到本地
+    if (saveToStorage) {
+      chrome.storage.local.set({ rateLimitInfo });
+      console.log('✅ Rate limit info saved to storage');
+    }
+  }
 
   generateBtn.addEventListener('click', async () => {
     try {
       generateBtn.disabled = true;
+      welcomeSection.classList.add('hidden');
       hideAll();
       progressFill.style.width = '0%';
       progressText.textContent = '0%';
@@ -86,11 +130,27 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
 
             if (!summaryResponse || !summaryResponse.success) {
-              showError(summaryResponse?.error || '生成重點時發生錯誤');
+              // 檢查是否為時間限制錯誤
+              if (summaryResponse.rateLimitReached && summaryResponse.waitTime) {
+                showRateLimitWarning(summaryResponse.waitTime);
+              } else {
+                showError(summaryResponse?.error || '生成重點時發生錯誤');
+              }
               return;
             }
 
             summaryContent.textContent = summaryResponse.summary;
+            
+            // 更新時間限制資訊（header 和首頁）
+            console.log('Popup: Received summaryResponse:', summaryResponse);
+            console.log('Popup: rateLimitInfo in response:', summaryResponse.rateLimitInfo);
+            
+            if (summaryResponse.rateLimitInfo && summaryResponse.rateLimitInfo.remaining !== undefined) {
+              console.log('Popup: Calling updateRateLimitInfo with:', summaryResponse.rateLimitInfo);
+              updateRateLimitInfo(summaryResponse.rateLimitInfo);
+            } else {
+              console.warn('Popup: No valid rateLimitInfo in response');
+            }
             
             loading.classList.add('hidden');
             successAnimation.classList.remove('hidden');
@@ -119,6 +179,22 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   });
 
+  // 返回首頁按鈕
+  backBtn.addEventListener('click', () => {
+    // 隱藏所有內容
+    hideAll();
+    // 顯示首頁
+    welcomeSection.classList.remove('hidden');
+    generateBtn.disabled = false;
+    
+    // 確保 header 中的限額資訊顯示
+    chrome.storage.local.get(['rateLimitInfo'], (result) => {
+      if (result.rateLimitInfo) {
+        updateRateLimitInfo(result.rateLimitInfo, false);
+      }
+    });
+  });
+
   function hideAll() {
     loading.classList.add('hidden');
     summary.classList.add('hidden');
@@ -126,6 +202,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     status.classList.add('hidden');
     videoInfo.classList.add('hidden');
     successAnimation.classList.add('hidden');
+    welcomeSection.classList.add('hidden');
+    document.getElementById('rateLimitWarning')?.classList.add('hidden');
   }
 
   function showError(message) {
@@ -146,6 +224,56 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   function showElement(element) {
     element.classList.remove('hidden');
+  }
+  
+  // 顯示時間限制警告和倒數計時
+  let countdownInterval = null;
+  function showRateLimitWarning(waitTime) {
+    hideAll();
+    generateBtn.disabled = true;
+    
+    const rateLimitWarning = document.getElementById('rateLimitWarning');
+    const countdownSeconds = document.getElementById('countdownSeconds');
+    const countdownProgress = document.getElementById('countdownProgress');
+    
+    if (!rateLimitWarning || !countdownSeconds || !countdownProgress) {
+      showError('請求過於頻繁，請稍後再試');
+      return;
+    }
+    
+    let remainingSeconds = waitTime;
+    const totalSeconds = waitTime;
+    
+    // 清除之前的倒數計時
+    if (countdownInterval) {
+      clearInterval(countdownInterval);
+    }
+    
+    // 更新顯示
+    const updateCountdown = () => {
+      countdownSeconds.textContent = remainingSeconds;
+      const progress = (totalSeconds - remainingSeconds) / totalSeconds * 100;
+      countdownProgress.style.width = `${progress}%`;
+      
+      if (remainingSeconds <= 0) {
+        clearInterval(countdownInterval);
+        countdownInterval = null;
+        rateLimitWarning.classList.add('hidden');
+        generateBtn.disabled = false;
+        welcomeSection.classList.remove('hidden');
+      } else {
+        remainingSeconds--;
+      }
+    };
+    
+    // 立即更新一次
+    updateCountdown();
+    
+    // 顯示警告
+    rateLimitWarning.classList.remove('hidden');
+    
+    // 每秒更新一次
+    countdownInterval = setInterval(updateCountdown, 1000);
   }
 });
 

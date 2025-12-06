@@ -2,6 +2,101 @@
 const GROQ_API_KEY = process.env.GROQ_API_KEY;
 const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions';
 
+// 時間限制：每分鐘最多生成次數（每個 IP）
+const RATE_LIMIT = 3; // 每分鐘最多 3 次
+const RATE_WINDOW = 60 * 1000; // 1 分鐘（毫秒）
+
+// 記憶體快取：追蹤每個 IP 的請求時間戳
+// 格式：{ 'ip': [timestamp1, timestamp2, ...] }
+const rateLimitCache = {};
+
+// 清理過期的時間戳（超過 1 分鐘）
+function cleanExpiredTimestamps() {
+  const now = Date.now();
+  
+  for (const ip in rateLimitCache) {
+    rateLimitCache[ip] = rateLimitCache[ip].filter(timestamp => {
+      return now - timestamp < RATE_WINDOW;
+    });
+    
+    // 如果沒有有效的時間戳，刪除該 IP 的記錄
+    if (rateLimitCache[ip].length === 0) {
+      delete rateLimitCache[ip];
+    }
+  }
+}
+
+// 獲取客戶端 IP 地址
+function getClientIP(req) {
+  const forwarded = req.headers['x-forwarded-for'];
+  const realIP = req.headers['x-real-ip'];
+  
+  if (forwarded) {
+    return forwarded.split(',')[0].trim();
+  }
+  if (realIP) {
+    return realIP;
+  }
+  return req.connection?.remoteAddress || 'unknown';
+}
+
+// 檢查時間限制（每分鐘最多 RATE_LIMIT 次）
+function checkRateLimit(ip) {
+  const now = Date.now();
+  
+  // 清理過期時間戳
+  cleanExpiredTimestamps();
+  
+  // 獲取該 IP 的請求時間戳列表
+  if (!rateLimitCache[ip]) {
+    rateLimitCache[ip] = [];
+  }
+  
+  // 過濾出在時間窗口內的請求
+  rateLimitCache[ip] = rateLimitCache[ip].filter(timestamp => {
+    return now - timestamp < RATE_WINDOW;
+  });
+  
+  const currentCount = rateLimitCache[ip].length;
+  
+  // 調試日誌
+  console.log('checkRateLimit:', {
+    ip,
+    currentCount,
+    limit: RATE_LIMIT,
+    cacheSize: Object.keys(rateLimitCache).length,
+    allIPs: Object.keys(rateLimitCache),
+    timestamps: rateLimitCache[ip]
+  });
+  
+  if (currentCount >= RATE_LIMIT) {
+    // 計算需要等待的時間（秒）
+    const oldestTimestamp = rateLimitCache[ip][0];
+    const waitTime = Math.ceil((RATE_WINDOW - (now - oldestTimestamp)) / 1000);
+    
+    console.log('Rate limit exceeded:', { ip, currentCount, waitTime });
+    
+    return {
+      allowed: false,
+      count: currentCount,
+      limit: RATE_LIMIT,
+      waitTime: waitTime
+    };
+  }
+  
+  // 添加當前請求的時間戳
+  rateLimitCache[ip].push(now);
+  
+  console.log('Rate limit check passed:', { ip, newCount: rateLimitCache[ip].length });
+  
+  return {
+    allowed: true,
+    count: currentCount + 1,
+    limit: RATE_LIMIT,
+    remaining: RATE_LIMIT - (currentCount + 1)
+  };
+}
+
 function detectLanguage(text) {
   if (!text || text.length === 0) return 'zh';
   const chinesePattern = /[\u4e00-\u9fff]/;
@@ -193,6 +288,26 @@ module.exports = async (req, res) => {
       });
     }
 
+    // 檢查時間限制
+    const clientIP = getClientIP(req);
+    const limitCheck = checkRateLimit(clientIP);
+    
+    if (!limitCheck.allowed) {
+      const detectedLanguage = detectLanguage('');
+      const isEnglish = detectedLanguage === 'en';
+      
+      return res.status(429).json({
+        success: false,
+        error: isEnglish 
+          ? `Rate limit exceeded. Please wait ${limitCheck.waitTime} seconds before trying again. (${limitCheck.count}/${limitCheck.limit} requests per minute)`
+          : `請求過於頻繁。請等待 ${limitCheck.waitTime} 秒後再試。（每分鐘 ${limitCheck.limit} 次）`,
+        rateLimitReached: true,
+        count: limitCheck.count,
+        limit: limitCheck.limit,
+        waitTime: limitCheck.waitTime
+      });
+    }
+
     const { videoData } = req.body;
 
     if (!videoData) {
@@ -306,7 +421,26 @@ module.exports = async (req, res) => {
         });
 
         if (!response.ok) {
-          return res.json({ success: true, summary: combinedSummary });
+          // 返回結果時包含剩餘次數（使用已更新的計數）
+          const now = Date.now();
+          if (!rateLimitCache[clientIP]) {
+            rateLimitCache[clientIP] = [];
+          }
+          rateLimitCache[clientIP] = rateLimitCache[clientIP].filter(timestamp => {
+            return now - timestamp < RATE_WINDOW;
+          });
+          const currentCount = rateLimitCache[clientIP].length;
+          
+          return res.json({ 
+            success: true, 
+            summary: combinedSummary,
+            rateLimitInfo: {
+              remaining: Math.max(0, RATE_LIMIT - currentCount),
+              count: currentCount,
+              limit: RATE_LIMIT,
+              windowSeconds: Math.floor(RATE_WINDOW / 1000)
+            }
+          });
         }
 
         const data = await response.json();
@@ -316,7 +450,32 @@ module.exports = async (req, res) => {
       }
     }
 
-    res.json({ success: true, summary });
+    // 返回結果時包含剩餘次數（使用已更新的計數）
+    // 注意：checkRateLimit 已經添加了時間戳，所以這裡讀取的計數應該是更新後的
+    const now = Date.now();
+    if (!rateLimitCache[clientIP]) {
+      rateLimitCache[clientIP] = [];
+    }
+    
+    // 過濾出在時間窗口內的請求
+    rateLimitCache[clientIP] = rateLimitCache[clientIP].filter(timestamp => {
+      return now - timestamp < RATE_WINDOW;
+    });
+    
+    const currentCount = rateLimitCache[clientIP].length;
+    
+    const rateLimitInfo = {
+      remaining: Math.max(0, RATE_LIMIT - currentCount),
+      count: currentCount,
+      limit: RATE_LIMIT,
+      windowSeconds: Math.floor(RATE_WINDOW / 1000)
+    };
+    
+    res.json({ 
+      success: true, 
+      summary,
+      rateLimitInfo: rateLimitInfo
+    });
   } catch (error) {
     console.error('生成摘要錯誤：', error);
     res.status(500).json({ 

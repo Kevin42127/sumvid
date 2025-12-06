@@ -130,11 +130,26 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     }
     
     generateSummary(request.data, progressCallback)
-      .then(summary => {
-        sendResponse({ success: true, summary });
+      .then(result => {
+        console.log('Background: Sending response with rateLimitInfo:', result.rateLimitInfo); // 調試用
+        sendResponse({ 
+          success: true, 
+          summary: result.summary,
+          rateLimitInfo: result.rateLimitInfo || null
+        });
       })
       .catch(error => {
-        sendResponse({ success: false, error: error.message });
+        const response = { success: false, error: error.message };
+        
+        // 如果是時間限制錯誤，傳遞額外資訊
+        if (error.rateLimitReached) {
+          response.rateLimitReached = true;
+          response.waitTime = error.waitTime;
+          response.count = error.count;
+          response.limit = error.limit;
+        }
+        
+        sendResponse(response);
       });
     return true;
   }
@@ -175,16 +190,37 @@ async function generateSummary(videoData, progressCallback) {
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
+      
+      // 如果是時間限制錯誤，保留額外資訊
+      if (response.status === 429 && errorData.rateLimitReached) {
+        const error = new Error(errorData.error || '請求過於頻繁');
+        error.rateLimitReached = true;
+        error.waitTime = errorData.waitTime;
+        error.count = errorData.count;
+        error.limit = errorData.limit;
+        throw error;
+      }
+      
       throw new Error(errorData.error || `後端服務錯誤：${response.status}`);
     }
 
     const data = await response.json();
     
+    console.log('Background: API response data:', data); // 調試用
+    console.log('Background: rateLimitInfo in response:', data.rateLimitInfo); // 調試用
+    
     if (!data.success) {
       throw new Error(data.error || '生成重點時發生錯誤');
     }
 
-    return data.summary;
+    const result = {
+      summary: data.summary,
+      rateLimitInfo: data.rateLimitInfo || null
+    };
+    
+    console.log('Background: Returning result:', result); // 調試用
+    
+    return result;
   } catch (error) {
     if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
       throw new Error(isEnglish ? '無法連接到後端服務，請確認服務是否運行' : '無法連接到後端服務，請確認服務是否運行');
