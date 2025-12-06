@@ -1,7 +1,15 @@
 node_modules/
 .env
+.env.local
+.env.*.local
 .DS_Store
 *.log
 .idea/
 .vscode/
+
+# 後端相關（如果不需要在倉庫中）
+# server.js 和 api/ 文件夾包含代碼但不包含 API key，API key 通過環境變數設定
+# 如果不想公開後端代碼，可以取消下面的註釋
+# server.js
+# api/
 
