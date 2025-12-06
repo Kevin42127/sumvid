@@ -3,8 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="refresh" content="0; url=privacy-policy.html">
-  <title>SumVid - 正在跳轉...</title>
+  <title>SumVid API</title>
   <style>
     body {
       font-family: 'Segoe UI', 'Microsoft JhengHei', sans-serif;
@@ -18,18 +17,41 @@
     }
     .container {
       text-align: center;
+      padding: 40px;
     }
-    a {
-      color: #ffffff;
-      text-decoration: underline;
+    h1 {
+      font-size: 48px;
+      margin-bottom: 20px;
+    }
+    p {
+      font-size: 18px;
+      margin-bottom: 10px;
+    }
+    .api-info {
+      background: rgba(255, 255, 255, 0.1);
+      padding: 20px;
+      border-radius: 8px;
+      margin-top: 30px;
+      text-align: left;
+      display: inline-block;
+    }
+    .api-info code {
+      background: rgba(0, 0, 0, 0.2);
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-family: 'Courier New', monospace;
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>SumVid</h1>
-    <p>正在跳轉到隱私權政策頁面...</p>
-    <p>如果沒有自動跳轉，請點擊 <a href="privacy-policy.html">這裡</a></p>
+    <h1>SumVid API</h1>
+    <p>後端服務運行中</p>
+    <div class="api-info">
+      <p><strong>API 端點：</strong></p>
+      <p><code>POST /api/generate-summary</code> - 生成影片重點</p>
+      <p><code>GET /api/health</code> - 健康檢查</p>
+    </div>
   </div>
 </body>
 </html>
