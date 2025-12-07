@@ -1,8 +1,9 @@
 {
   "manifest_version": 3,
-  "name": "SumVid",
+  "name": "__MSG_appName__",
   "version": "1.0.0",
-  "description": "SumVid - 讓 AI 為您快速提取影片重點",
+  "description": "__MSG_appDescription__",
+  "default_locale": "zh_TW",
   "permissions": [
     "activeTab",
     "storage"
@@ -34,7 +35,6 @@
     "48": "icons/icon48.png",
     "128": "icons/icon128.png"
   },
-  "homepage_url": "https://github.com/Kevin42127/sumvid",
-  "privacy_policy": "https://sumvid.vercel.app/privacy.html"
+  "homepage_url": "https://github.com/Kevin42127/sumvid"
 }
 

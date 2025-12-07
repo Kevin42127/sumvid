@@ -1,0 +1,195 @@
+{
+  "appName": {
+    "message": "SumVid",
+    "description": "應用程式名稱"
+  },
+  "appDescription": {
+    "message": "SumVid - 讓 AI 為您快速提取影片重點",
+    "description": "應用程式描述"
+  },
+  "welcomeTitle": {
+    "message": "歡迎使用 SumVid",
+    "description": "歡迎標題"
+  },
+  "welcomeSubtitle": {
+    "message": "讓 AI 為您快速提取 YouTube 影片重點",
+    "description": "歡迎副標題"
+  },
+  "featureFast": {
+    "message": "快速生成",
+    "description": "功能特色：快速生成"
+  },
+  "featureAutoDetect": {
+    "message": "自動偵測",
+    "description": "功能特色：自動偵測"
+  },
+  "featureAI": {
+    "message": "AI 智能分析",
+    "description": "功能特色：AI 分析"
+  },
+  "buttonGenerate": {
+    "message": "生成影片重點",
+    "description": "生成按鈕"
+  },
+  "buttonBack": {
+    "message": "返回首頁",
+    "description": "返回按鈕"
+  },
+  "buttonCopy": {
+    "message": "複製重點",
+    "description": "複製按鈕"
+  },
+  "loadingAnalyzing": {
+    "message": "正在分析影片內容...",
+    "description": "載入中文字"
+  },
+  "successCompleted": {
+    "message": "重點生成完成！",
+    "description": "成功訊息"
+  },
+  "summaryTitle": {
+    "message": "影片重點",
+    "description": "重點標題"
+  },
+  "rateLimitTooFrequent": {
+    "message": "請求過於頻繁",
+    "description": "時間限制警告"
+  },
+  "rateLimitWait": {
+    "message": "請等待",
+    "description": "等待文字"
+  },
+  "rateLimitSeconds": {
+    "message": "秒後再試",
+    "description": "秒數文字"
+  },
+  "rateLimitRemaining": {
+    "message": "剩餘",
+    "description": "剩餘次數"
+  },
+  "rateLimitTimes": {
+    "message": "次",
+    "description": "次數單位"
+  },
+  "rateLimitWithin": {
+    "message": "內",
+    "description": "時間範圍內"
+  },
+  "rateLimitPerMinute": {
+    "message": "每分鐘最多",
+    "description": "每分鐘限制"
+  },
+  "rateLimitGenerations": {
+    "message": "次生成",
+    "description": "生成次數"
+  },
+  "versionLabel": {
+    "message": "版本",
+    "description": "版本標籤"
+  },
+  "errorNotYouTube": {
+    "message": "請在 YouTube 影片頁面使用此功能",
+    "description": "錯誤：不在 YouTube 頁面"
+  },
+  "errorGetVideoInfo": {
+    "message": "無法取得影片資訊，請重新整理頁面後再試",
+    "description": "錯誤：無法取得影片資訊"
+  },
+  "errorGetVideoInfoError": {
+    "message": "無法取得影片資訊",
+    "description": "錯誤：取得影片資訊失敗"
+  },
+  "errorConnectBackground": {
+    "message": "無法連接到背景服務",
+    "description": "錯誤：無法連接背景服務"
+  },
+  "errorGenerateError": {
+    "message": "生成重點時發生錯誤",
+    "description": "錯誤：生成失敗"
+  },
+  "errorTooFrequent": {
+    "message": "請求過於頻繁，請稍後再試",
+    "description": "錯誤：請求過於頻繁"
+  },
+  "errorUnexpected": {
+    "message": "發生未預期的錯誤：",
+    "description": "錯誤：未預期錯誤"
+  },
+  "errorCopySuccess": {
+    "message": "已複製到剪貼簿",
+    "description": "成功：複製成功"
+  },
+  "errorCopyFailed": {
+    "message": "複製失敗",
+    "description": "錯誤：複製失敗"
+  },
+  "languageName": {
+    "message": "中文",
+    "description": "語言名稱：中文"
+  },
+  "languageSwitch": {
+    "message": "切換語言",
+    "description": "語言切換提示"
+  },
+  "onboardingTitle": {
+    "message": "歡迎使用 SumVid！",
+    "description": "首次使用引導標題"
+  },
+  "onboardingStep1": {
+    "message": "1. 前往 YouTube 影片頁面",
+    "description": "引導步驟1"
+  },
+  "onboardingStep2": {
+    "message": "2. 點擊「生成影片重點」按鈕",
+    "description": "引導步驟2"
+  },
+  "onboardingStep3": {
+    "message": "3. 等待 AI 分析完成",
+    "description": "引導步驟3"
+  },
+  "onboardingStep4": {
+    "message": "4. 複製或查看生成的重點",
+    "description": "引導步驟4"
+  },
+  "onboardingGotIt": {
+    "message": "我知道了",
+    "description": "引導確認按鈕"
+  },
+  "loadingStageAnalyzing": {
+    "message": "正在分析影片內容",
+    "description": "載入階段：分析中"
+  },
+  "loadingStageChunk": {
+    "message": "正在分析第 {current} / {total} 段內容",
+    "description": "載入階段：分析片段"
+  },
+  "loadingStageIntegrating": {
+    "message": "正在整合所有重點",
+    "description": "載入階段：整合中"
+  },
+  "videoPreviewTitle": {
+    "message": "影片資訊",
+    "description": "影片預覽標題"
+  },
+  "videoPreviewConfirm": {
+    "message": "確認生成",
+    "description": "確認生成按鈕"
+  },
+  "videoPreviewCancel": {
+    "message": "取消",
+    "description": "取消按鈕"
+  },
+  "tooltipGenerate": {
+    "message": "點擊生成當前 YouTube 影片的重點摘要",
+    "description": "生成按鈕提示"
+  },
+  "tooltipCopy": {
+    "message": "複製重點內容到剪貼簿",
+    "description": "複製按鈕提示"
+  },
+  "tooltipBack": {
+    "message": "返回首頁",
+    "description": "返回按鈕提示"
+  }
+}
+

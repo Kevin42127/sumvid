@@ -182,7 +182,7 @@ async function generateSummary(videoData, progressCallback) {
   const isEnglish = detectedLanguage === 'en';
 
   if (progressCallback) {
-    progressCallback({ current: 1, total: 1, text: langConfig.progressText.analyzing });
+    progressCallback({ current: 1, total: 1, text: langConfig.progressText.analyzing, stage: 'analyzing' });
   }
 
   try {

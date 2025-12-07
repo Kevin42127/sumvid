@@ -1,0 +1,195 @@
+{
+  "appName": {
+    "message": "SumVid",
+    "description": "Application name"
+  },
+  "appDescription": {
+    "message": "SumVid - Let AI quickly extract YouTube video highlights for you",
+    "description": "Application description"
+  },
+  "welcomeTitle": {
+    "message": "Welcome to SumVid",
+    "description": "Welcome title"
+  },
+  "welcomeSubtitle": {
+    "message": "Let AI quickly extract YouTube video highlights for you",
+    "description": "Welcome subtitle"
+  },
+  "featureFast": {
+    "message": "Fast Generation",
+    "description": "Feature: Fast generation"
+  },
+  "featureAutoDetect": {
+    "message": "Auto-detect",
+    "description": "Feature: Auto-detect"
+  },
+  "featureAI": {
+    "message": "AI Smart Analysis",
+    "description": "Feature: AI analysis"
+  },
+  "buttonGenerate": {
+    "message": "Generate Video Summary",
+    "description": "Generate button"
+  },
+  "buttonBack": {
+    "message": "Back to Home",
+    "description": "Back button"
+  },
+  "buttonCopy": {
+    "message": "Copy Summary",
+    "description": "Copy button"
+  },
+  "loadingAnalyzing": {
+    "message": "Analyzing video content...",
+    "description": "Loading text"
+  },
+  "successCompleted": {
+    "message": "Summary generation completed!",
+    "description": "Success message"
+  },
+  "summaryTitle": {
+    "message": "Video Summary",
+    "description": "Summary title"
+  },
+  "rateLimitTooFrequent": {
+    "message": "Too many requests",
+    "description": "Rate limit warning"
+  },
+  "rateLimitWait": {
+    "message": "Please wait",
+    "description": "Wait text"
+  },
+  "rateLimitSeconds": {
+    "message": "seconds before trying again",
+    "description": "Seconds text"
+  },
+  "rateLimitRemaining": {
+    "message": "Remaining",
+    "description": "Remaining count"
+  },
+  "rateLimitTimes": {
+    "message": "times",
+    "description": "Times unit"
+  },
+  "rateLimitWithin": {
+    "message": "within",
+    "description": "Time range"
+  },
+  "rateLimitPerMinute": {
+    "message": "Maximum",
+    "description": "Per minute limit"
+  },
+  "rateLimitGenerations": {
+    "message": "generations per minute",
+    "description": "Generations count"
+  },
+  "versionLabel": {
+    "message": "Version",
+    "description": "Version label"
+  },
+  "errorNotYouTube": {
+    "message": "Please use this feature on a YouTube video page",
+    "description": "Error: Not on YouTube page"
+  },
+  "errorGetVideoInfo": {
+    "message": "Unable to get video information, please refresh the page and try again",
+    "description": "Error: Unable to get video info"
+  },
+  "errorGetVideoInfoError": {
+    "message": "Unable to get video information",
+    "description": "Error: Failed to get video info"
+  },
+  "errorConnectBackground": {
+    "message": "Unable to connect to background service",
+    "description": "Error: Unable to connect background"
+  },
+  "errorGenerateError": {
+    "message": "An error occurred while generating summary",
+    "description": "Error: Generation failed"
+  },
+  "errorTooFrequent": {
+    "message": "Too many requests, please try again later",
+    "description": "Error: Too many requests"
+  },
+  "errorUnexpected": {
+    "message": "An unexpected error occurred: ",
+    "description": "Error: Unexpected error"
+  },
+  "errorCopySuccess": {
+    "message": "Copied to clipboard",
+    "description": "Success: Copy succeeded"
+  },
+  "errorCopyFailed": {
+    "message": "Copy failed",
+    "description": "Error: Copy failed"
+  },
+  "languageName": {
+    "message": "English",
+    "description": "Language name: English"
+  },
+  "languageSwitch": {
+    "message": "Switch language",
+    "description": "Language switch tooltip"
+  },
+  "onboardingTitle": {
+    "message": "Welcome to SumVid!",
+    "description": "Onboarding title"
+  },
+  "onboardingStep1": {
+    "message": "1. Go to a YouTube video page",
+    "description": "Onboarding step 1"
+  },
+  "onboardingStep2": {
+    "message": "2. Click the \"Generate Video Summary\" button",
+    "description": "Onboarding step 2"
+  },
+  "onboardingStep3": {
+    "message": "3. Wait for AI analysis to complete",
+    "description": "Onboarding step 3"
+  },
+  "onboardingStep4": {
+    "message": "4. Copy or view the generated summary",
+    "description": "Onboarding step 4"
+  },
+  "onboardingGotIt": {
+    "message": "Got it",
+    "description": "Onboarding confirm button"
+  },
+  "loadingStageAnalyzing": {
+    "message": "Analyzing video content",
+    "description": "Loading stage: Analyzing"
+  },
+  "loadingStageChunk": {
+    "message": "Analyzing segment {current} / {total}",
+    "description": "Loading stage: Analyzing chunk"
+  },
+  "loadingStageIntegrating": {
+    "message": "Integrating all key points",
+    "description": "Loading stage: Integrating"
+  },
+  "videoPreviewTitle": {
+    "message": "Video Information",
+    "description": "Video preview title"
+  },
+  "videoPreviewConfirm": {
+    "message": "Confirm Generate",
+    "description": "Confirm generate button"
+  },
+  "videoPreviewCancel": {
+    "message": "Cancel",
+    "description": "Cancel button"
+  },
+  "tooltipGenerate": {
+    "message": "Click to generate summary for current YouTube video",
+    "description": "Generate button tooltip"
+  },
+  "tooltipCopy": {
+    "message": "Copy summary content to clipboard",
+    "description": "Copy button tooltip"
+  },
+  "tooltipBack": {
+    "message": "Back to home",
+    "description": "Back button tooltip"
+  }
+}
+

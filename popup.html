@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-TW">
+<html id="htmlLang" lang="zh-TW">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,40 +11,54 @@
   <div class="container">
     <div class="header">
       <div class="header-left">
+        <button id="backBtn" class="back-btn header-back-btn hidden" data-i18n-title="buttonBack">
+          <span class="material-icons">arrow_back</span>
+        </button>
         <h1>SumVid</h1>
       </div>
-      <div id="headerLimitInfo" class="header-limit-info hidden">
-        <span class="material-icons">info_outline</span>
-        <span id="headerLimitInfoText"></span>
+      <div class="header-right">
+        <div id="headerLimitInfo" class="header-limit-info hidden">
+          <span class="material-icons">info_outline</span>
+          <span id="headerLimitInfoText"></span>
+        </div>
       </div>
     </div>
     
     <div class="content">
+      <div id="onboarding" class="onboarding hidden">
+        <div class="onboarding-content">
+          <span class="material-icons onboarding-icon">lightbulb</span>
+          <h2 data-i18n="onboardingTitle">歡迎使用 SumVid！</h2>
+          <div class="onboarding-steps">
+            <p data-i18n="onboardingStep1">1. 前往 YouTube 影片頁面</p>
+            <p data-i18n="onboardingStep2">2. 點擊「生成影片重點」按鈕</p>
+            <p data-i18n="onboardingStep3">3. 等待 AI 分析完成</p>
+            <p data-i18n="onboardingStep4">4. 複製或查看生成的重點</p>
+          </div>
+          <button id="onboardingClose" class="onboarding-btn" data-i18n="onboardingGotIt">我知道了</button>
+        </div>
+      </div>
+      
       <div id="welcomeSection" class="welcome-section">
         <div class="welcome-message">
           <span class="material-icons welcome-icon">auto_awesome</span>
-          <h2>歡迎使用 SumVid</h2>
-          <p>讓 AI 為您快速提取 YouTube 影片重點</p>
+          <h2 data-i18n="welcomeTitle">歡迎使用 SumVid</h2>
+          <p data-i18n="welcomeSubtitle">讓 AI 為您快速提取 YouTube 影片重點</p>
         </div>
         
         <div class="features">
           <div class="feature-item">
             <span class="material-icons">speed</span>
-            <span>快速生成</span>
+            <span data-i18n="featureFast">快速生成</span>
           </div>
           <div class="feature-item">
             <span class="material-icons">translate</span>
-            <span>自動偵測影片語言</span>
+            <span data-i18n="featureAutoDetect">自動偵測影片語言</span>
           </div>
           <div class="feature-item">
             <span class="material-icons">smart_toy</span>
-            <span>AI 智能分析</span>
+            <span data-i18n="featureAI">AI 智能分析</span>
           </div>
-        </div>
-        
-        <div class="version-info">
-          <span class="material-icons">info</span>
-          <span>版本 v1.0.0</span>
         </div>
         
         <div class="limit-info">
@@ -55,6 +69,31 @@
       
       <div id="status" class="status hidden"></div>
       
+      <div id="videoPreview" class="video-preview hidden">
+        <div class="video-preview-header">
+          <span class="material-icons">info</span>
+          <h3 data-i18n="videoPreviewTitle">影片資訊</h3>
+        </div>
+        <div class="video-preview-content">
+          <div class="preview-item">
+            <span class="material-icons">videocam</span>
+            <span id="previewTitle" class="preview-title"></span>
+          </div>
+          <div class="preview-item" id="previewDescriptionContainer" style="display: none;">
+            <span class="material-icons">description</span>
+            <span id="previewDescription" class="preview-description"></span>
+          </div>
+          <div class="preview-item" id="previewTranscriptContainer" style="display: none;">
+            <span class="material-icons">subtitles</span>
+            <span id="previewTranscript" class="preview-transcript"></span>
+          </div>
+        </div>
+        <div class="video-preview-actions">
+          <button id="previewCancel" class="preview-btn preview-btn-cancel" data-i18n="videoPreviewCancel">取消</button>
+          <button id="previewConfirm" class="preview-btn preview-btn-confirm" data-i18n="videoPreviewConfirm">確認生成</button>
+        </div>
+      </div>
+      
       <div id="videoInfo" class="video-info hidden">
         <div class="info-item">
           <span class="material-icons">videocam</span>
@@ -64,7 +103,7 @@
       
       <div id="loading" class="loading hidden">
         <div class="spinner"></div>
-        <p id="loadingText">正在分析影片內容...</p>
+        <p id="loadingText" data-i18n="loadingAnalyzing">正在分析影片內容...</p>
         <div class="progress-container">
           <div class="progress-bar">
             <div id="progressFill" class="progress-fill"></div>
@@ -77,17 +116,14 @@
         <div class="success-icon">
           <span class="material-icons">check_circle</span>
         </div>
-        <p>重點生成完成！</p>
+        <p data-i18n="successCompleted">重點生成完成！</p>
       </div>
       
       <div id="summary" class="summary hidden">
         <div class="summary-header">
-          <button id="backBtn" class="back-btn" title="返回首頁">
-            <span class="material-icons">arrow_back</span>
-          </button>
           <span class="material-icons">article</span>
-          <h2>影片重點</h2>
-          <button id="copyBtn" class="copy-btn" title="複製重點">
+          <h2 data-i18n="summaryTitle">影片重點</h2>
+          <button id="copyBtn" class="copy-btn" data-i18n-title="buttonCopy">
             <span class="material-icons">content_copy</span>
           </button>
         </div>
@@ -103,8 +139,8 @@
         <div class="rate-limit-content">
           <span class="material-icons">schedule</span>
           <div class="rate-limit-text">
-            <p>請求過於頻繁</p>
-            <p class="countdown-text">請等待 <span id="countdownSeconds">0</span> 秒後再試</p>
+            <p data-i18n="rateLimitTooFrequent">請求過於頻繁</p>
+            <p class="countdown-text"><span data-i18n="rateLimitWait">請等待</span> <span id="countdownSeconds">0</span> <span data-i18n="rateLimitSeconds">秒後再試</span></p>
           </div>
         </div>
         <div class="countdown-progress">
@@ -112,10 +148,15 @@
         </div>
       </div>
       
-      <button id="generateBtn" class="generate-btn">
+      <button id="generateBtn" class="generate-btn" data-i18n-title="tooltipGenerate">
         <span class="material-icons">auto_awesome</span>
-        <span>生成影片重點</span>
+        <span data-i18n="buttonGenerate">生成影片重點</span>
       </button>
+      
+      <div class="version-info">
+        <span class="material-icons">info</span>
+        <span id="versionText"><span data-i18n="versionLabel">版本</span> v1.0.0</span>
+      </div>
     </div>
   </div>
   

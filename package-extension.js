@@ -10,7 +10,8 @@ const filesToInclude = [
   'popup.html',
   'popup.css',
   'popup.js',
-  'icons/'
+  'icons/',
+  '_locales/'
 ];
 
 // 需要排除的文件和資料夾

@@ -1,60 +1,237 @@
-document.addEventListener('DOMContentLoaded', async () => {
-  const generateBtn = document.getElementById('generateBtn');
-      const loading = document.getElementById('loading');
-      const loadingText = document.getElementById('loadingText');
-      const progressFill = document.getElementById('progressFill');
-      const progressText = document.getElementById('progressText');
-      const successAnimation = document.getElementById('successAnimation');
-      const summary = document.getElementById('summary');
-      const summaryContent = document.getElementById('summaryContent');
-      const error = document.getElementById('error');
-      const errorMessage = document.getElementById('errorMessage');
-      const videoInfo = document.getElementById('videoInfo');
-      const videoTitle = document.getElementById('videoTitle');
-      const status = document.getElementById('status');
-      const copyBtn = document.getElementById('copyBtn');
-      const backBtn = document.getElementById('backBtn');
-      const welcomeLimitInfo = document.getElementById('welcomeLimitInfo');
-      const welcomeSection = document.getElementById('welcomeSection');
-      
-  // 載入時檢查是否有存儲的限額資訊（時間限制不需要日期檢查）
+function t(key) {
+  return chrome.i18n.getMessage(key) || key;
+}
+
+function updateRateLimitInfoDisplay() {
   chrome.storage.local.get(['rateLimitInfo'], (result) => {
     if (result.rateLimitInfo) {
       updateRateLimitInfo(result.rateLimitInfo, false);
     }
   });
-  
-  // 更新時間限制資訊的函數
-  function updateRateLimitInfo(rateLimitInfo, saveToStorage = true) {
-    if (!rateLimitInfo || rateLimitInfo.remaining === undefined) {
-      console.log('updateRateLimitInfo: Invalid rateLimitInfo', rateLimitInfo);
+}
+
+function updateUI() {
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    if (el.tagName === 'SPAN' && el.parentElement && el.parentElement.id === 'versionText') {
       return;
     }
-    
-    const { remaining, count, limit, windowSeconds } = rateLimitInfo;
-    console.log('updateRateLimitInfo: Updating with', { remaining, count, limit, windowSeconds });
-    
-    // 更新 header 中的限額資訊
-    const headerLimitInfoEl = document.getElementById('headerLimitInfo');
-    const headerLimitInfoText = document.getElementById('headerLimitInfoText');
-    if (headerLimitInfoEl && headerLimitInfoText) {
-      headerLimitInfoText.textContent = `剩餘 ${remaining}/${limit} 次（${windowSeconds}秒內）`;
-      headerLimitInfoEl.classList.remove('hidden');
-      console.log('✅ Header rate limit info updated');
+    el.textContent = t(key);
+  });
+  
+  document.querySelectorAll('[data-i18n-title]').forEach(el => {
+    const key = el.getAttribute('data-i18n-title');
+    el.title = t(key);
+  });
+  
+  const versionText = document.getElementById('versionText');
+  if (versionText) {
+    const manifest = chrome.runtime.getManifest();
+    const versionLabel = versionText.querySelector('[data-i18n="versionLabel"]');
+    if (versionLabel) {
+      versionLabel.textContent = t('versionLabel');
     } else {
-      console.error('❌ Header limit info elements not found');
+      versionText.innerHTML = `<span data-i18n="versionLabel">${t('versionLabel')}</span> v${manifest.version}`;
     }
-    
-    // 更新首頁中的限額資訊
-    if (welcomeLimitInfo) {
-      welcomeLimitInfo.textContent = `每分鐘最多 ${limit} 次生成`;
+  }
+  
+  if (typeof updateRateLimitInfoDisplay === 'function') {
+    updateRateLimitInfoDisplay();
+  }
+}
+
+function updateRateLimitInfo(rateLimitInfo, saveToStorage = true) {
+  if (!rateLimitInfo || rateLimitInfo.remaining === undefined) {
+    console.log('updateRateLimitInfo: Invalid rateLimitInfo', rateLimitInfo);
+    return;
+  }
+  
+  const { remaining, count, limit, windowSeconds } = rateLimitInfo;
+  console.log('updateRateLimitInfo: Updating with', { remaining, count, limit, windowSeconds });
+  
+  const headerLimitInfoEl = document.getElementById('headerLimitInfo');
+  const headerLimitInfoText = document.getElementById('headerLimitInfoText');
+  if (headerLimitInfoEl && headerLimitInfoText) {
+    headerLimitInfoText.textContent = `${t('rateLimitRemaining')} ${remaining}/${limit} ${t('rateLimitTimes')}`;
+    headerLimitInfoEl.classList.remove('hidden');
+    console.log('✅ Header rate limit info updated');
+  } else {
+    console.error('❌ Header limit info elements not found');
+  }
+  
+  const welcomeLimitInfo = document.getElementById('welcomeLimitInfo');
+  if (welcomeLimitInfo) {
+    welcomeLimitInfo.textContent = `${t('rateLimitPerMinute')} ${limit} ${t('rateLimitGenerations')}`;
+  }
+  
+  if (saveToStorage) {
+    chrome.storage.local.set({ rateLimitInfo });
+    console.log('✅ Rate limit info saved to storage');
+  }
+}
+
+document.addEventListener('DOMContentLoaded', async () => {
+  const generateBtn = document.getElementById('generateBtn');
+  const loading = document.getElementById('loading');
+  const loadingText = document.getElementById('loadingText');
+  const progressFill = document.getElementById('progressFill');
+  const progressText = document.getElementById('progressText');
+  const successAnimation = document.getElementById('successAnimation');
+  const summary = document.getElementById('summary');
+  const summaryContent = document.getElementById('summaryContent');
+  const error = document.getElementById('error');
+  const errorMessage = document.getElementById('errorMessage');
+  const videoInfo = document.getElementById('videoInfo');
+  const videoTitle = document.getElementById('videoTitle');
+  const status = document.getElementById('status');
+  const copyBtn = document.getElementById('copyBtn');
+  const backBtn = document.getElementById('backBtn');
+  const welcomeLimitInfo = document.getElementById('welcomeLimitInfo');
+  const welcomeSection = document.getElementById('welcomeSection');
+  const versionText = document.getElementById('versionText');
+  const onboarding = document.getElementById('onboarding');
+  const onboardingClose = document.getElementById('onboardingClose');
+  const videoPreview = document.getElementById('videoPreview');
+  const previewTitle = document.getElementById('previewTitle');
+  const previewDescription = document.getElementById('previewDescription');
+  const previewTranscript = document.getElementById('previewTranscript');
+  const previewDescriptionContainer = document.getElementById('previewDescriptionContainer');
+  const previewTranscriptContainer = document.getElementById('previewTranscriptContainer');
+  const previewConfirm = document.getElementById('previewConfirm');
+  const previewCancel = document.getElementById('previewCancel');
+  
+  let pendingVideoData = null;
+  
+  const htmlLang = document.getElementById('htmlLang');
+  if (htmlLang) {
+    htmlLang.setAttribute('lang', 'zh-TW');
+  }
+  
+  chrome.storage.local.get(['hasSeenOnboarding'], (result) => {
+    if (!result.hasSeenOnboarding) {
+      onboarding.classList.remove('hidden');
     }
-    
-    // 存儲到本地
-    if (saveToStorage) {
-      chrome.storage.local.set({ rateLimitInfo });
-      console.log('✅ Rate limit info saved to storage');
+  });
+  
+  onboardingClose.addEventListener('click', () => {
+    onboarding.classList.add('fade-out');
+    setTimeout(() => {
+      onboarding.classList.add('hidden');
+      chrome.storage.local.set({ hasSeenOnboarding: true });
+    }, 300);
+  });
+  
+  previewCancel.addEventListener('click', () => {
+    videoPreview.classList.add('hidden');
+    welcomeSection.classList.remove('hidden');
+    generateBtn.disabled = false;
+    pendingVideoData = null;
+  });
+  
+  previewConfirm.addEventListener('click', () => {
+    if (pendingVideoData) {
+      videoPreview.classList.add('hidden');
+      startGeneration(pendingVideoData);
+      pendingVideoData = null;
     }
+  });
+  
+  updateUI();
+
+  function startGeneration(videoData) {
+    hideAll();
+    progressFill.style.width = '0%';
+    progressText.textContent = '0%';
+    loading.classList.remove('hidden');
+
+    if (videoData.title) {
+      videoTitle.textContent = videoData.title;
+      showElement(videoInfo);
+    }
+
+    const progressListener = (message) => {
+      if (message.action === 'updateProgress' && message.progress) {
+        const { current, total, text, stage } = message.progress;
+        const percentage = Math.round((current / total) * 100);
+        
+        progressFill.style.width = `${percentage}%`;
+        progressText.textContent = `${percentage}%`;
+        
+        let displayText = '';
+        if (stage === 'analyzing') {
+          displayText = t('loadingStageAnalyzing');
+        } else if (stage === 'chunk' && total > 1) {
+          displayText = t('loadingStageChunk').replace('{current}', current).replace('{total}', total);
+        } else if (stage === 'integrating') {
+          displayText = t('loadingStageIntegrating');
+        } else if (text) {
+          displayText = text;
+        } else {
+          displayText = t('loadingAnalyzing');
+        }
+        
+        if (total > 1 && stage !== 'chunk') {
+          loadingText.textContent = `${displayText} (${current}/${total})`;
+        } else {
+          loadingText.textContent = displayText;
+        }
+      }
+    };
+
+    chrome.runtime.onMessage.addListener(progressListener);
+
+    chrome.runtime.sendMessage(
+      { action: 'generateSummary', data: videoData },
+      (summaryResponse) => {
+        chrome.runtime.onMessage.removeListener(progressListener);
+        generateBtn.disabled = false;
+        loading.classList.add('hidden');
+
+        if (chrome.runtime.lastError) {
+          showError(t('errorConnectBackground'));
+          return;
+        }
+
+        if (!summaryResponse || !summaryResponse.success) {
+          if (summaryResponse.rateLimitReached && summaryResponse.waitTime) {
+            showRateLimitWarning(summaryResponse.waitTime);
+          } else {
+            showError(summaryResponse?.error || t('errorGenerateError'));
+          }
+          return;
+        }
+
+        summaryContent.textContent = summaryResponse.summary;
+        
+        console.log('Popup: Received summaryResponse:', JSON.stringify(summaryResponse, null, 2));
+        console.log('Popup: rateLimitInfo in response:', summaryResponse.rateLimitInfo);
+        console.log('Popup: rateLimitInfo type:', typeof summaryResponse.rateLimitInfo);
+        console.log('Popup: rateLimitInfo remaining:', summaryResponse.rateLimitInfo?.remaining);
+        
+        if (summaryResponse.rateLimitInfo && typeof summaryResponse.rateLimitInfo === 'object' && summaryResponse.rateLimitInfo.remaining !== undefined) {
+          console.log('Popup: Calling updateRateLimitInfo with:', summaryResponse.rateLimitInfo);
+          updateRateLimitInfo(summaryResponse.rateLimitInfo);
+        } else {
+          console.warn('Popup: No valid rateLimitInfo in response');
+          console.warn('Popup: summaryResponse keys:', Object.keys(summaryResponse || {}));
+          updateRateLimitInfo({
+            remaining: 2,
+            count: 1,
+            limit: 3,
+            windowSeconds: 60
+          });
+        }
+        
+        loading.classList.add('hidden');
+        successAnimation.classList.remove('hidden');
+        
+        setTimeout(() => {
+          successAnimation.classList.add('hidden');
+          showElement(summary);
+          backBtn.classList.remove('hidden');
+        }, 1500);
+      }
+    );
   }
 
   generateBtn.addEventListener('click', async () => {
@@ -62,34 +239,26 @@ document.addEventListener('DOMContentLoaded', async () => {
       generateBtn.disabled = true;
       welcomeSection.classList.add('hidden');
       hideAll();
-      progressFill.style.width = '0%';
-      progressText.textContent = '0%';
-      loading.classList.remove('hidden');
 
       const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
       
       if (!tab.url || !tab.url.includes('youtube.com/watch')) {
-        showError('請在 YouTube 影片頁面使用此功能');
+        showError(t('errorNotYouTube'));
         generateBtn.disabled = false;
         return;
       }
 
       chrome.tabs.sendMessage(tab.id, { action: 'getVideoInfo' }, async (response) => {
         if (chrome.runtime.lastError) {
-          showError('無法取得影片資訊，請重新整理頁面後再試');
+          showError(t('errorGetVideoInfo'));
           generateBtn.disabled = false;
           return;
         }
 
         if (!response || !response.success) {
-          showError(response?.error || '無法取得影片資訊');
+          showError(response?.error || t('errorGetVideoInfoError'));
           generateBtn.disabled = false;
           return;
-        }
-
-        if (response.videoTitle) {
-          videoTitle.textContent = response.videoTitle;
-          showElement(videoInfo);
         }
 
         const videoData = {
@@ -99,83 +268,32 @@ document.addEventListener('DOMContentLoaded', async () => {
           transcriptSegments: response.transcriptSegments || []
         };
 
-        const progressListener = (message) => {
-          if (message.action === 'updateProgress' && message.progress) {
-            const { current, total, text } = message.progress;
-            const percentage = Math.round((current / total) * 100);
-            
-            progressFill.style.width = `${percentage}%`;
-            progressText.textContent = `${percentage}%`;
-            
-            if (total > 1) {
-              loadingText.textContent = `${text} (${current}/${total})`;
-            } else {
-              loadingText.textContent = text || '正在分析影片內容...';
-            }
-          }
-        };
-
-        chrome.runtime.onMessage.addListener(progressListener);
-
-        chrome.runtime.sendMessage(
-          { action: 'generateSummary', data: videoData },
-          (summaryResponse) => {
-            chrome.runtime.onMessage.removeListener(progressListener);
-            generateBtn.disabled = false;
-            loading.classList.add('hidden');
-
-            if (chrome.runtime.lastError) {
-              showError('無法連接到背景服務');
-              return;
-            }
-
-            if (!summaryResponse || !summaryResponse.success) {
-              // 檢查是否為時間限制錯誤
-              if (summaryResponse.rateLimitReached && summaryResponse.waitTime) {
-                showRateLimitWarning(summaryResponse.waitTime);
-              } else {
-                showError(summaryResponse?.error || '生成重點時發生錯誤');
-              }
-              return;
-            }
-
-            summaryContent.textContent = summaryResponse.summary;
-            
-            // 更新時間限制資訊（header 和首頁）
-            console.log('Popup: Received summaryResponse:', JSON.stringify(summaryResponse, null, 2));
-            console.log('Popup: rateLimitInfo in response:', summaryResponse.rateLimitInfo);
-            console.log('Popup: rateLimitInfo type:', typeof summaryResponse.rateLimitInfo);
-            console.log('Popup: rateLimitInfo remaining:', summaryResponse.rateLimitInfo?.remaining);
-            
-            if (summaryResponse.rateLimitInfo && typeof summaryResponse.rateLimitInfo === 'object' && summaryResponse.rateLimitInfo.remaining !== undefined) {
-              console.log('Popup: Calling updateRateLimitInfo with:', summaryResponse.rateLimitInfo);
-              updateRateLimitInfo(summaryResponse.rateLimitInfo);
-            } else {
-              console.warn('Popup: No valid rateLimitInfo in response');
-              console.warn('Popup: summaryResponse keys:', Object.keys(summaryResponse || {}));
-              // 即使沒有 rateLimitInfo，也嘗試使用默認值
-              updateRateLimitInfo({
-                remaining: 2,
-                count: 1,
-                limit: 3,
-                windowSeconds: 60
-              });
-            }
-            
-            loading.classList.add('hidden');
-            successAnimation.classList.remove('hidden');
-            
-            setTimeout(() => {
-              successAnimation.classList.add('hidden');
-              showElement(summary);
-            }, 1500);
-          }
-        );
+        previewTitle.textContent = videoData.title || t('errorGetVideoInfoError');
+        
+        if (videoData.description) {
+          previewDescription.textContent = videoData.description;
+          previewDescriptionContainer.style.display = 'flex';
+        } else {
+          previewDescriptionContainer.style.display = 'none';
+        }
+        
+        if (videoData.transcript) {
+          previewTranscript.textContent = videoData.transcript.length > 100 
+            ? videoData.transcript.substring(0, 100) + '...' 
+            : videoData.transcript;
+          previewTranscriptContainer.style.display = 'flex';
+        } else {
+          previewTranscriptContainer.style.display = 'none';
+        }
+        
+        pendingVideoData = videoData;
+        videoPreview.classList.remove('hidden');
+        generateBtn.disabled = false;
       });
     } catch (err) {
       generateBtn.disabled = false;
       loading.classList.add('hidden');
-      showError('發生未預期的錯誤：' + err.message);
+      showError(t('errorUnexpected') + err.message);
     }
   });
 
@@ -183,21 +301,18 @@ document.addEventListener('DOMContentLoaded', async () => {
     const text = summaryContent.textContent;
     try {
       await navigator.clipboard.writeText(text);
-      showStatus('已複製到剪貼簿');
+      showStatus(t('errorCopySuccess'));
     } catch (err) {
-      showError('複製失敗');
+      showError(t('errorCopyFailed'));
     }
   });
 
-  // 返回首頁按鈕
   backBtn.addEventListener('click', () => {
-    // 隱藏所有內容
     hideAll();
-    // 顯示首頁
     welcomeSection.classList.remove('hidden');
     generateBtn.disabled = false;
+    backBtn.classList.add('hidden');
     
-    // 確保 header 中的限額資訊顯示
     chrome.storage.local.get(['rateLimitInfo'], (result) => {
       if (result.rateLimitInfo) {
         updateRateLimitInfo(result.rateLimitInfo, false);
@@ -213,6 +328,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     videoInfo.classList.add('hidden');
     successAnimation.classList.add('hidden');
     welcomeSection.classList.add('hidden');
+    videoPreview.classList.add('hidden');
     document.getElementById('rateLimitWarning')?.classList.add('hidden');
   }
 
@@ -236,7 +352,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     element.classList.remove('hidden');
   }
   
-  // 顯示時間限制警告和倒數計時
   let countdownInterval = null;
   function showRateLimitWarning(waitTime) {
     hideAll();
@@ -245,21 +360,27 @@ document.addEventListener('DOMContentLoaded', async () => {
     const rateLimitWarning = document.getElementById('rateLimitWarning');
     const countdownSeconds = document.getElementById('countdownSeconds');
     const countdownProgress = document.getElementById('countdownProgress');
+    const rateLimitText = rateLimitWarning?.querySelector('.rate-limit-text');
     
     if (!rateLimitWarning || !countdownSeconds || !countdownProgress) {
-      showError('請求過於頻繁，請稍後再試');
+      showError(t('errorTooFrequent'));
       return;
+    }
+    
+    if (rateLimitText) {
+      const waitText = rateLimitText.querySelector('[data-i18n="rateLimitWait"]');
+      const secondsText = rateLimitText.querySelector('[data-i18n="rateLimitSeconds"]');
+      if (waitText) waitText.textContent = t('rateLimitWait');
+      if (secondsText) secondsText.textContent = t('rateLimitSeconds');
     }
     
     let remainingSeconds = waitTime;
     const totalSeconds = waitTime;
     
-    // 清除之前的倒數計時
     if (countdownInterval) {
       clearInterval(countdownInterval);
     }
     
-    // 更新顯示
     const updateCountdown = () => {
       countdownSeconds.textContent = remainingSeconds;
       const progress = (totalSeconds - remainingSeconds) / totalSeconds * 100;
@@ -276,14 +397,8 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
     };
     
-    // 立即更新一次
     updateCountdown();
-    
-    // 顯示警告
     rateLimitWarning.classList.remove('hidden');
-    
-    // 每秒更新一次
     countdownInterval = setInterval(updateCountdown, 1000);
   }
 });
-
