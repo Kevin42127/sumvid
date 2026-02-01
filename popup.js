@@ -13,9 +13,6 @@ function updateRateLimitInfoDisplay() {
 function updateUI() {
   document.querySelectorAll('[data-i18n]').forEach(el => {
     const key = el.getAttribute('data-i18n');
-    if (el.tagName === 'SPAN' && el.parentElement && el.parentElement.id === 'versionText') {
-      return;
-    }
     el.textContent = t(key);
   });
   
@@ -23,17 +20,6 @@ function updateUI() {
     const key = el.getAttribute('data-i18n-title');
     el.title = t(key);
   });
-  
-  const versionText = document.getElementById('versionText');
-  if (versionText) {
-    const manifest = chrome.runtime.getManifest();
-    const versionLabel = versionText.querySelector('[data-i18n="versionLabel"]');
-    if (versionLabel) {
-      versionLabel.textContent = t('versionLabel');
-    } else {
-      versionText.innerHTML = `<span data-i18n="versionLabel">${t('versionLabel')}</span> v${manifest.version}`;
-    }
-  }
 
   const welcomeLimitInfo = document.getElementById('welcomeLimitInfo');
   if (welcomeLimitInfo) {
@@ -93,7 +79,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   const backBtn = document.getElementById('backBtn');
   const welcomeLimitInfo = document.getElementById('welcomeLimitInfo');
   const welcomeSection = document.getElementById('welcomeSection');
-  const versionText = document.getElementById('versionText');
   const onboarding = document.getElementById('onboarding');
   const onboardingClose = document.getElementById('onboardingClose');
   const videoPreview = document.getElementById('videoPreview');

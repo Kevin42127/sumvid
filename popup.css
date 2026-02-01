@@ -359,23 +359,6 @@ body {
   font-weight: 500;
 }
 
-.version-info {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  font-size: 11px;
-  color: #94a3b8;
-  margin-top: 12px;
-  padding-top: 12px;
-  border-top: 1px solid #e2e8f0;
-}
-
-.version-info .material-icons {
-  font-size: 14px;
-  color: #94a3b8;
-}
-
 .limit-info {
   display: flex;
   align-items: center;
