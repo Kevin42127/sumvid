@@ -34,7 +34,12 @@ function updateUI() {
       versionText.innerHTML = `<span data-i18n="versionLabel">${t('versionLabel')}</span> v${manifest.version}`;
     }
   }
-  
+
+  const welcomeLimitInfo = document.getElementById('welcomeLimitInfo');
+  if (welcomeLimitInfo) {
+    welcomeLimitInfo.textContent = `${t('rateLimitPerMinute')} 3 ${t('rateLimitGenerations')}`;
+  }
+
   if (typeof updateRateLimitInfoDisplay === 'function') {
     updateRateLimitInfoDisplay();
   }
